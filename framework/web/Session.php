@@ -98,6 +98,7 @@ class Session extends Component implements \IteratorAggregate, \ArrayAccess, \Co
         parent::init();
         register_shutdown_function([$this, 'close']);
         if ($this->getIsActive()) {
+            $this->updateFlashCounters();
             Yii::warning("Session is already started", __METHOD__);
         }
     }
@@ -182,7 +183,9 @@ class Session extends Component implements \IteratorAggregate, \ArrayAccess, \Co
     {
         if ($this->getIsActive()) {
             @session_unset();
+            $sessionId = session_id();
             @session_destroy();
+            @session_id($sessionId);
         }
     }
 

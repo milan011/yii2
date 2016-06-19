@@ -28,6 +28,8 @@ class ActionFilter extends Behavior
      * Note that if the filter is attached to a module, the action IDs should also include child module IDs (if any)
      * and controller IDs.
      *
+     * Since version 2.0.9 action IDs can be specified as wildcards, e.g. `site/*`.
+     *
      * @see except
      */
     public $only;
@@ -36,6 +38,7 @@ class ActionFilter extends Behavior
      * @see only
      */
     public $except = [];
+
 
     /**
      * @inheritdoc
@@ -110,12 +113,13 @@ class ActionFilter extends Behavior
     }
 
     /**
-     * Returns an $action ID, convert action uniqueId into an ID relative to the module
+     * Returns an action ID by converting [[Action::$uniqueId]] into an ID relative to the module
      * @param Action $action
      * @return string
      * @since 2.0.7
      */
-    protected function getActionId($action) {
+    protected function getActionId($action)
+    {
         if ($this->owner instanceof Module) {
             $mid = $this->owner->getUniqueId();
             $id = $action->getUniqueId();
@@ -137,6 +141,27 @@ class ActionFilter extends Behavior
     protected function isActive($action)
     {
         $id = $this->getActionId($action);
-        return !in_array($id, $this->except, true) && (empty($this->only) || in_array($id, $this->only, true));
+
+        if (empty($this->only)) {
+            $onlyMatch = true;
+        } else {
+            $onlyMatch = false;
+            foreach ($this->only as $pattern) {
+                if (fnmatch($pattern, $id)) {
+                    $onlyMatch = true;
+                    break;
+                }
+            }
+        }
+
+        $exceptMatch = false;
+        foreach ($this->except as $pattern) {
+            if (fnmatch($pattern, $id)) {
+                $exceptMatch = true;
+                break;
+            }
+        }
+
+        return !$exceptMatch && $onlyMatch;
     }
 }

@@ -41,7 +41,6 @@ class MessageController extends Controller
      * @var string controller default action ID.
      */
     public $defaultAction = 'extract';
-
     /**
      * @var string required, root directory of all source files.
      */
@@ -141,24 +140,48 @@ class MessageController extends Controller
      */
     public function options($actionID)
     {
-        return [
-                'sourcePath',
-                'messagePath',
-                'languages',
-                'translator',
-                'sort',
-                'overwrite',
-                'removeUnused',
-                'markUnused',
-                'except',
-                'only',
-                'format',
-                'db',
-                'sourceMessageTable',
-                'messageTable',
-                'catalog',
-                'ignoreCategories'
-        ];
+        return array_merge(parent::options($actionID), [
+            'sourcePath',
+            'messagePath',
+            'languages',
+            'translator',
+            'sort',
+            'overwrite',
+            'removeUnused',
+            'markUnused',
+            'except',
+            'only',
+            'format',
+            'db',
+            'sourceMessageTable',
+            'messageTable',
+            'catalog',
+            'ignoreCategories',
+        ]);
+    }
+
+    /**
+     * @inheritdoc
+     * @since 2.0.8
+     */
+    public function optionAliases()
+    {
+        return array_merge(parent::optionAliases(), [
+            'c' => 'catalog',
+            'e' => 'except',
+            'f' => 'format',
+            'i' => 'ignoreCategories',
+            'l' => 'languages',
+            'u' => 'markUnused',
+            'p' => 'messagePath',
+            'o' => 'only',
+            'w' => 'overwrite',
+            'S' => 'sort',
+            't' => 'translator',
+            'm' => 'sourceMessageTable',
+            's' => 'sourcePath',
+            'r' => 'removeUnused',
+        ]);
     }
 
     /**
@@ -531,6 +554,7 @@ EOD;
      * @param string $category category that is checked
      * @param array $ignoreCategories message categories to ignore.
      * @return boolean
+     * @since 2.0.7
      */
     protected function isCategoryIgnored($category, array $ignoreCategories)
     {
@@ -574,7 +598,7 @@ EOD;
      * Finds out a line of the first non-char PHP token found
      *
      * @param array $tokens
-     * @return int|string
+     * @return integer|string
      * @since 2.0.1
      */
     protected function getLine($tokens)

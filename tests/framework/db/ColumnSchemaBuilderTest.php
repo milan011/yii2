@@ -9,6 +9,7 @@ namespace yiiunit\framework\db;
 
 
 use yii\db\ColumnSchemaBuilder;
+use yii\db\Expression;
 use yii\db\Schema;
 use yiiunit\TestCase;
 
@@ -30,22 +31,28 @@ class ColumnSchemaBuilderTest extends TestCase
     /**
      * @return array
      */
-    public function unsignedProvider()
+    public function typesProvider()
     {
         return [
-            ['integer UNSIGNED', Schema::TYPE_INTEGER, null, [
+            ['integer NULL', Schema::TYPE_INTEGER, null, [
+                ['unsigned'], ['null'],
+            ]],
+            ['integer(10)', Schema::TYPE_INTEGER, 10, [
                 ['unsigned'],
             ]],
-            ['integer(10) UNSIGNED', Schema::TYPE_INTEGER, 10, [
-                ['unsigned'],
+            ['timestamp() WITH TIME ZONE NOT NULL', 'timestamp() WITH TIME ZONE', null, [
+                ['notNull']
+            ]],
+            ['timestamp() WITH TIME ZONE DEFAULT NOW()', 'timestamp() WITH TIME ZONE', null, [
+                ['defaultValue', new Expression('NOW()')]
             ]],
         ];
     }
 
     /**
-     * @dataProvider unsignedProvider
+     * @dataProvider typesProvider
      */
-    public function testUnsigned($expected, $type, $length, $calls)
+    public function testCustomTypes($expected, $type, $length, $calls)
     {
         $this->checkBuildString($expected, $type, $length, $calls);
     }

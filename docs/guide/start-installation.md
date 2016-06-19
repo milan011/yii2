@@ -96,7 +96,7 @@ But there are other installation options available:
 Verifying the Installation <span id="verifying-installation"></span>
 --------------------------
 
-After installation is done, either configure your web server (see next section) or use
+After installation is done, either configure your web server (see next section) or use the
 [built-in PHP web server](https://secure.php.net/manual/en/features.commandline.webserver.php) by running the following
 console command while in the project `web` directory:
  
@@ -114,7 +114,7 @@ php yii serve --port=8888
 You can use your browser to access the installed Yii application with the following URL:
 
 ```
-http://localhost/
+http://localhost:8080/
 ```
 
 ![Successful Installation of Yii](images/start-app-installed.png)
@@ -208,7 +208,7 @@ server {
 
     location / {
         # Redirect everything that isn't a real file to index.php
-        try_files $uri $uri/ /index.php?$args;
+        try_files $uri $uri/ /index.php$is_args$args;
     }
 
     # uncomment to avoid processing of calls to non-existing static files by Yii
@@ -219,7 +219,7 @@ server {
 
     location ~ \.php$ {
         include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME $document_root/$fastcgi_script_name;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         fastcgi_pass   127.0.0.1:9000;
         #fastcgi_pass unix:/var/run/php5-fpm.sock;
         try_files $uri =404;

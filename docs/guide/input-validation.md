@@ -96,6 +96,27 @@ According to the above validation steps, an attribute will be validated if and o
 an active attribute declared in `scenarios()` and is associated with one or multiple active rules
 declared in `rules()`.
 
+> Note: It is handy to give names to rules i.e.
+> ```php
+> public function rules()
+> {
+>     return [
+>         // ...
+>         'password' => [['password'], 'string', 'max' => 60],
+>     ];
+> }
+> ```
+>
+> You can use it in a child model:
+>
+> ```php
+> public function rules()
+> {
+>     $rules = parent::rules();
+>     unset($rules['password']);
+>     return $rules;
+> }
+
 
 ### Customizing Error Messages <span id="customizing-error-messages"></span>
 
@@ -219,7 +240,7 @@ with a PHP callable. For example,
     }]
 ```
 
-> Note: Most validators do not handle empty inputs if their [[yii\base\Validator::skipOnEmpty]] property takes
+> Note: Most validators do not handle empty inputs if their [[yii\validators\Validator::skipOnEmpty]] property takes
   the default value true. They will simply be skipped during validation if their associated attributes receive empty
   inputs. Among the [core validators](tutorial-core-validators.md), only the `captcha`, `default`, `filter`,
   `required`, and `trim` validators will handle empty inputs.
@@ -556,6 +577,10 @@ JS;
 > ]
 > ```
 
+> Tip: If you need to work with client validation manually i.e. dynamically add fields or do some custom UI logic, refer
+> to [Working with ActiveForm via JavaScript](https://github.com/samdark/yii2-cookbook/blob/master/book/forms-activeform-js.md)
+> in Yii 2.0 Cookbook.
+
 ### Deferred Validation <span id="deferred-validation"></span>
 
 If you need to perform asynchronous client-side validation, you can create [Deferred objects](http://api.jquery.com/category/deferred-object/).
@@ -684,3 +709,6 @@ this request by running the validation and returning the errors in JSON format.
 
 > Info: You can also use [Deferred Validation](#deferred-validation) to perform AJAX validation.
   However, the AJAX validation feature described here is more systematic and requires less coding effort.
+
+When both `enableClientValidation` and `enableAjaxValidation` are set to true, AJAX validation request will be triggered
+only after the successful client validation.

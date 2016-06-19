@@ -87,6 +87,9 @@ $query->select(['user_id' => 'user.id', 'email']);
 $query->select(["CONCAT(first_name, ' ', last_name) AS full_name", 'email']); 
 ```
 
+生の SQL が使われる場所ではどこでもそうですが、セレクトに DB 式を書く場合には、テーブルやカラムの名前を表すために
+[特定のデータベースに依存しない引用符の構文](db-dao.md#quoting-table-and-column-names) を使うことが出来ます。
+
 バージョン 2.0.1 以降では、サブクエリもセレクトすることが出来ます。
 各サブクエリは、[[yii\db\Query]] オブジェクトの形で指定しなければなりません。
 例えば、
@@ -155,7 +158,7 @@ $query->from(['u' => $subQuery]);
 
 #### 文字列形式 <span id="string-format"></span>
 
-文字列形式は、非常に単純な条件を定義する場合に最適です。
+文字列形式は、非常に単純な条件を定義する場合や、DBMS の組み込み関数を使う必要がある場合に最適です。
 これは、生の SQL を書いている場合と同じように動作します。
 例えば、
 
@@ -164,6 +167,9 @@ $query->where('status=1');
 
 // あるいは、パラメータバインディングを使って、動的にパラメータをバインドする
 $query->where('status=:status', [':status' => $status]);
+
+// date フィールドに対して MySQL の YEAR() 関数を使う生の SQL
+$query->where('YEAR(somedate) = 2015');
 ```
 
 次のように、条件式に変数を直接に埋め込んではいけません。
@@ -180,6 +186,9 @@ $query->where("status=$status");
 $query->where('status=:status')
     ->addParams([':status' => $status]);
 ```
+
+生の SQL が使われる場所ではどこでもそうですが、文字列形式で条件を書く場合には、テーブルやカラムの名前を表すために
+[特定のデータベースに依存しない引用符の構文](db-dao.md#quoting-table-and-column-names) を使うことが出来ます。
 
 
 #### ハッシュ形式 <span id="hash-format"></span>
@@ -322,6 +331,20 @@ $query->filterWhere([
 > Info: 値が空であると見なされるのは、null、空の配列、空の文字列、または空白のみを含む文字列である場合です。
 
 [[yii\db\Query::andWhere()|andWhere()]] または [[yii\db\Query::orWhere()|orWhere()]] と同じように、[[yii\db\Query::andFilterWhere()|andFilterWhere()]] または [[yii\db\Query::orFilterWhere()|orFilterWhere()]] を使って、既存の条件に別のフィルタ条件を追加することも出来ます。
+
+さらに加えて、値の方に含まれている比較演算子を適切に判断してくれる [[yii\db\Query::andFilterCompare()]] があります。
+
+```php
+$query->andFilterCompare('name', 'John Doe');
+$query->andFilterCompare('rating', '>9');
+$query->andFilterCompare('value', '<=100');
+```
+
+比較演算子を明示的に指定することも可能です。
+
+```php
+$query->andFilterCompare('name', 'Doe', 'like');
+```
 
 ### [[yii\db\Query::orderBy()|orderBy()]] <span id="order-by"></span>
 
@@ -570,6 +593,13 @@ $query = (new \yii\db\Query())
 ```
 
 この無名関数は、現在の行データを含む `$row` というパラメータを取り、現在の行のインデックス値として使われるスカラ値を返さなくてはなりません。
+
+> Note: [[yii\db\Query::groupBy()|groupBy()]] や [[yii\db\Query::orderBy()|orderBy()]]
+> のようなクエリメソッドが SQL に変換されてクエリの一部となるのとは対照的に、
+> このメソッドはデータベースからデータが取得された後で動作します。
+> このことは、クエリの SELECT に含まれるカラム名だけを使うことが出来る、ということを意味します。
+> また、テーブルプレフィックスを付けてカラムを選択した場合、例えば `customer.id` を選択した場合は、
+> リザルトセットのカラム名は `id` しか含みませんので、テーブルプレフィックス無しで `->indexBy('id')` と呼ぶ必要があります。
 
 
 ## バッチクエリ <span id="batch-query"></span>
